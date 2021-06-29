@@ -1,13 +1,8 @@
-# Hardhat Hackathon Boilerplate
+# SuperCheckOut using SuperFluid
 
-This repository contains a sample project that you can use as the starting point
-for your Ethereum project. It's also a great fit for learning the basics of
-smart contract development.
+This repository contains source code for SuperCheckOut. SuperCheckOut application that allows a buyer to start STREAMING money to the seller. This enables the buyers to book items whose prizes are higher than their balance; giving them freedom to pay-per-second for those items--- we can take this like ESI - Equated Secondly Installments similiar to EMI - Equated Monthly Installments). **provided the buyer will have enough balance in future to keep the stream flowing.
 
-This project is intended to be used with the
-[Hardhat Beginners Tutorial](https://hardhat.org/tutorial), but you should be
-able to follow it by yourself by reading the README and exploring its
-`contracts`, `tests`, `scripts` and `frontend` directories.
+
 
 ## Quick start
 
@@ -15,7 +10,7 @@ The first things you need to do are cloning this repository and installing its
 dependencies:
 
 ```sh
-git clone https://github.com/nomiclabs/hardhat-hackathon-boilerplate.git
+git clone *url*
 cd hardhat-hackathon-boilerplate
 npm install
 ```
