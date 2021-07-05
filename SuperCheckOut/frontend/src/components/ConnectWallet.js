@@ -1,7 +1,7 @@
 import React from "react";
 
 import { NetworkErrorMessage } from "./NetworkErrorMessage";
-
+import { Button, Message} from 'semantic-ui-react';
 export function ConnectWallet({ connectWallet, networkError, dismiss }) {
   return (
     <div className="container">
@@ -24,6 +24,9 @@ export function ConnectWallet({ connectWallet, networkError, dismiss }) {
           >
             Connect Wallet
           </button>
+          <br/>
+          <Message content="Welcome Human."/><br/><br/>
+          <img src="/SuperCheckOut.png" alt="image" />
         </div>
       </div>
     </div>

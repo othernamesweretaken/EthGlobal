@@ -1,0 +1,27 @@
+{
+  "name": "autobot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "autotaskBot.js",
+  "defender-relay-client": "^1.8.0",
+  "ethers": "^5.3.0",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "defender-relay-client": "^1.8.0",
+    "ethers": "^5.3.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "the-answer": "^1.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^19.0.0",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "@rollup/plugin-typescript": "^8.2.1",
+    "rollup": "^2.51.1"
+  }
+}

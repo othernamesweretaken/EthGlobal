@@ -13,6 +13,7 @@ import { ethers, Signer } from "ethers";
 import { NoWalletDetected } from "./NoWalletDetected";
 import { ConnectWallet } from "./ConnectWallet";
 import { Loading } from "./Loading";
+import App from './App';
 import { Transfer } from "./Transfer";
 import { TransactionErrorMessage } from "./TransactionErrorMessage";
 import { WaitingForTransactionMessage } from "./WaitingForTransactionMessage";
@@ -20,15 +21,22 @@ import { NoTokensMessage } from "./NoTokensMessage";
 
 import TokenArtifact from "../contracts/Token.json";
 import fDaixABI from "../contracts/fDaix.json";
+import shopABI from "../contracts/shopABI.json";
 import contractAddress from "../contracts/contract-address.json";
 
 import {Form, Button, Input, Message} from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
+import { AbiCoder } from "ethers/lib/utils";
 // This is the Hardhat Network id, you might change it in the hardhat.config.js
 // Here's a list of network ids https://docs.metamask.io/guide/ethereum-provider.html#properties
 // to use when deploying to other networks.
 const HARDHAT_NETWORK_ID = '31337';
-
+// const {
+//   web3tx,
+//   toWad,
+//   wad4human,
+//   toBN,
+// } = require("@decentral.ee/web3-helpers");
 // This is an error code that indicates that the user canceled a transaction
 const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 
@@ -42,10 +50,11 @@ const ERROR_CODE_TX_REJECTED_BY_USER = 4001;
 // Note that (3) and (4) are specific of this sample application, but they show
 // you how to keep your Dapp and contract's state in sync,  and how to send a
 // transaction.
-
+const Web3 = require('web3');
+const web3 = new Web3();
 const SuperfluidSDK = require("@superfluid-finance/js-sdk");
 const { Web3Provider } = require("@ethersproject/providers");
-
+const abiCoder = ethers.utils.defaultAbiCoder;
 
 export class Dapp extends React.Component {
   constructor(props) {
@@ -56,18 +65,21 @@ export class Dapp extends React.Component {
     this.initialState = {
       // The info of the token (i.e. It's Name and symbol)
       tokenData: undefined,
+      tokenData1: undefined,
       // The user's address and balance
       selectedAddress: undefined,
       balance: undefined,
+      balance1: undefined,
       // The ID about transactions being sent, and any possible error with them
       txBeingSent: undefined,
       transactionError: undefined,
       networkError: undefined,
-      sf: undefined
+      sf: undefined,
+      closeOrderId: 0
     };
 
     this.state = this.initialState;
-    this.initializeSuperFluid();
+
   }
 
 // ------------------------------SuperFluid -----------------------------------
@@ -80,21 +92,45 @@ async initializeSuperFluid(){
   this.setState({sf})
   console.log("SuperFluid Initializes");
 } 
-transferDai = async (event) => {
+checkOut = async (event) => {
 event.preventDefault();
 const carol = this.state.sf.user({
   address: this.state.selectedAddress,
-  token: '0xF2d68898557cCb2Cf4C10c3Ef2B034b2a69DAD00'
+  token: contractAddress.fDaix
 });
+var userData1 = web3.eth.abi.encodeParameters(['uint[3]','uint[3]','address[3]','uint[3]','uint'], 
+[['1','2','3'],['1','1','1'] ,['0x9D1Ad4E0eb71c4A41BCa9920a023b553fbb0Cdff',
+'0x2F8EB06c311214707f83461cC77646c9Aef9985f','0xDb1B2424d33e8E981cad7AbC7A3b7B4493D0528a'],['200','200','600'],'1000']);
+console.log(userData1);
 await carol.flow({
-recipient: '0xCFD767dFaDd1c3BC2fF28CEB5A22495d9E4E811a',
-flowRate: '385802469135802'
+recipient: contractAddress.superCheckOut,
+flowRate: '385802469135802',
+userData: userData1
 });
 
 const details = await carol.details();
 console.log(details);
 
 }    
+
+closeOrder = async (event) => {
+  event.preventDefault();
+  const carol = this.state.sf.user({
+    address: this.state.selectedAddress,
+    token: contractAddress.fDaix
+  });
+  var userData1 = web3.eth.abi.encodeParameters(['uint[3]','uint[3]','address[3]','uint[3]','uint'], 
+  [['1','2','3'],['1','1','1'] ,['0x9D1Ad4E0eb71c4A41BCa9920a023b553fbb0Cdff',
+  '0x2F8EB06c311214707f83461cC77646c9Aef9985f','0xDb1B2424d33e8E981cad7AbC7A3b7B4493D0528a'],['200','200','600'],'1000']);
+  await carol.flow({
+  recipient: contractAddress.superCheckOut,
+  flowRate: '0'
+  });
+  
+  const details = await carol.details();
+  console.log(details);
+  
+  }   
   render() {
     // Ethereum wallets inject the window.ethereum object. If it hasn't been
     // injected, we instruct the user to install MetaMask.
@@ -127,26 +163,34 @@ console.log(details);
 
     // If everything is loaded, we render the application.
     return (
+      <div>
       <div className="container p-4">
-        <div className="row">
-          <div className="col-12">
-            <h1>
-              {this.state.tokenData.name} ({this.state.tokenData.symbol})
-            </h1>
-            <p>
-              Welcome <b>{this.state.selectedAddress}</b>, you have{" "}
-              <b>
-                {this.state.balance.toString()} {this.state.tokenData.symbol}
-              </b>
-              .
-            </p>
-          </div>
+      <div className="row">
+        <div className="col-12">
+          <h1>
+            {this.state.tokenData.name} ({this.state.tokenData.symbol})
+          </h1>
+            Welcome to SuperCheckOut.<b>{this.state.selectedAddress}</b>, you have{" "}
+            <b>
+              {this.state.balance.toString()/10**18} {this.state.tokenData.symbol}
+            </b>
+            <br/>
+            <b>
+              <Message content ={this.state.balance1.toString()/10**18+"($"+this.state.tokenData1.symbol1+")"}/>
+            </b>  
         </div>
+      </div>
 
-        <hr />
-        <Button primary onClick={(event)=> this.transferDai(event)}>Transfer Token</Button><br/>
-      <br/>
+      <hr />
+      <Button primary onClick={(event)=> this.checkOut(event)}>Check Out</Button>&nbsp;&nbsp;&nbsp;
+      <Input
+              value={this.state.closeOrderId}
+              onChange={event => this.setState({ closeOrderId: event.target.value })}
+            /><Button primary onClick={(event)=> this.closeOrder(event)}>Close Order</Button> 
+  </div>
+      <App/>
     </div>
+
     );
   }
 
@@ -162,6 +206,7 @@ async _connectWallet() {
 
     // To connect to the user's wallet, we have to run this method.
     // It returns a promise that will resolve to the user's address.
+
     const selectedAddress = (await window.ethereum.send('eth_requestAccounts')).result[0];
    // console.log(selectedAddress);
     // Once we have the address, we can initialize the application.
@@ -172,7 +217,7 @@ async _connectWallet() {
     }
 
     this._initialize(selectedAddress);
-
+    this.initializeSuperFluid();
     // We reinitialize it whenever the user changes their account.
     window.ethereum.on("accountsChanged", ([newAddress]) => {
       this._stopPollingData();
@@ -180,11 +225,12 @@ async _connectWallet() {
       // This happens when the user removes the Dapp from the "Connected
       // list of sites allowed access to your addresses" (Metamask > Settings > Connections)
       // To avoid errors, we reset the dapp state 
-      if (newAddress === undefined) {
-        return this._resetState();
-      }
-      
-      this._initialize(newAddress);
+      this._resetState();
+
+      this.setState({   
+        networkError: 'Account Change Detected'
+      });
+     // this._initialize(newAddress);
     });
     
     // We reset the dapp state if the network is changed
@@ -214,15 +260,24 @@ async _connectWallet() {
 
   async _intializeEthers() {
     // We first initialize ethers by creating a provider using window.ethereum
-    this._provider = new ethers.providers.InfuraProvider("goerli","36cf751fcee44680a9cfd6c14bebd207");
+    this._provider = new ethers.providers.Web3Provider(window.ethereum);
+// Prompt user for account connections
+    this._signer = this._provider.getSigner(0);
+
+//    this._provider = new ethers.providers.InfuraProvider("goerli","36cf751fcee44680a9cfd6c14bebd207");
 
     // When, we initialize the contract using that provider and the token's
     // artifact. You can do this same thing with your contracts.
       this._token = new ethers.Contract(
       contractAddress.fDaix,
       fDaixABI,
-      this._provider
+      this._provider.getSigner(0)
     );
+    this._token1 = new ethers.Contract(
+      contractAddress.shop,
+      shopABI,
+      this._provider.getSigner(0)
+    )
   }
 
   // The next to methods are needed to start and stop polling data. While
@@ -240,25 +295,28 @@ async _connectWallet() {
   }
 
   _stopPollingData() {
-    // clearInterval(this._pollDataInterval);
-    // this._pollDataInterval = undefined;
+    clearInterval(this._pollDataInterval);
+    this._pollDataInterval = undefined;
   }
 
   // The next two methods just read from the contract and store the results
   // in the component state.
   async _getTokenData() {
     console.log("Wait");
+    const name1 = await this._token1.name();
+    const symbol1 = await this._token1.symbol();
+    const balance1 = await this._token1.balanceOf(this.state.selectedAddress);
     const name = await this._token.name();
     const symbol = await this._token.symbol();
-    console.log("Fetching");
-    this.setState({ tokenData: { name, symbol } });
     const balance = await this._token.balanceOf(this.state.selectedAddress);
-    this.setState({ balance });
+    console.log("Fetching");
+    this.setState({ tokenData: { name, symbol}, tokenData1: {name1, symbol1},balance, balance1 });
   }
 
   async _updateBalance() {
+    const balance1 = await this._token1.balanceOf(this.state.selectedAddress);
     const balance = await this._token.balanceOf(this.state.selectedAddress);
-    this.setState({ balance });
+    this.setState({ balance, balance1 });
   }
 
 
